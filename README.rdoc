@@ -1,0 +1,67 @@
+= active_access
+
+The ActiveAccess mixin makes it easy to limit access to ActiveModel
+and ActiveRecord attributes by declaring generated attribute accessor
+methods private.
+
+Mixing the <tt>ActiveAcess::AttributeMethods</tt> into a class that mixes
+in ActiveModel::AttributeMethods or is derived from ActiveRecord::Base
+adds the <tt>attr_private</tt> and <tt>attr_private_writer</tt> macros.
+
+These macros change the behavior of +define_attribute_methods+ to declare
+generated attribute accessors private: +attr_private+ declares all
+accessors for an attribute private; +attr_private_writer+ declares only
+writer methods private.
+
+ActiveAccess recognizes the following attribute reader method name
+patterns:
+
+  #name
+  #name?
+  #name_before_type_cast
+  #name_changed?
+  #name_change
+  #name_was
+  #_name
+
+ActiveAccess recognizes the following attribute writer method name
+patterns:
+
+  #name=
+  #name_will_change
+  #reset_name!
+
+== Example
+  
+  class Widget < ActiveRecord::Base
+  
+    include ActiveAccess::AttributeMethods
+  
+    attr_private_writer :read_me
+  
+    attr_private :secret
+  
+  end
+  
+  Widget.new.respond_to? :read_me  # => true
+  Widget.new.read_me = "new value" # raises NoMethodError
+  
+  Widget.new.respond_to? :secret   # => false
+  Widget.new.secret = "new value"  # raises NoMethodError
+  
+== Limitations
+
+ActiveAccess only restricts access to named attribute accessors. Unnamed
+accessors such as ActiveRecord +read_attribute+ and +write_attribute+ as
+well as hash-style access are not restricted. Attribute aliases are also
+unrestricted.
+
+ActiveRecord does not allow attributes with private writers to be
+initialized (i.e. passed as parameters to +new+) or mass-assigned
+(passed as parameters to +assign_attributes+ or +attributes=+).
+
+== Copyright
+
+Copyright (c) 2012 Riley Lynch, Teleological Software, LLC.
+See LICENSE.txt for further details.
+
